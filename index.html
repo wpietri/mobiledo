@@ -1,5 +1,63 @@
+<!DOCTYPE html>
 <html>
-<head><title>MobileDo</title></head>
+<head>
+    <title>MobileDo</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf8"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <script src="enyo/enyo.js"></script>
+    <script>enyo.depends(
+            // include support libraries
+            "$lib/layout",
+            "$lib/onyx",
+            // include application sources
+            "css",
+            "models",
+            "controllers",
+            "views",
+            "apps",
+            // include our default entry point
+            "start.js"
+    );
+    </script>
+    <script>
+        enyo.ready(function () {
+            new MobileDo.Application({name: "app"});
+        });
+
+        enyo.kind({
+            name: "MobileDo.MainView",
+            kind: "FittableRows",
+            fit: true,
+            components: [{
+                name: "toolbar",
+                kind: "onyx.Toolbar",
+                components: [{content: "MobileDo"}]
+
+            }, {
+                kind: "enyo.Scroller",
+                fit: true,
+                components: [{content: "Hello World"}]
+            }, {
+                kind: "onyx.Toolbar",
+                components: []
+            }],
+        });
+
+
+        enyo.kind({
+            name: "MobileDo.Application",
+            kind: "enyo.Application",
+            components: [],
+            view: "MobileDo.MainView",
+            handlers: {
+            }
+        });
+
+
+    </script>
+
+</head>
 <body>
 <p>Hello, world!</p>
 </body>
