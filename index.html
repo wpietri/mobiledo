@@ -36,7 +36,7 @@
                 components: [{
                     name: "item",
                     components: [
-                        {tag: "input", name: "checked"},
+                        {tag: "input", attributes: {type: "checkbox"}, name: "checked"},
                         {tag: "span", content: " "},
                         {tag: "span", name: "name"}
                     ]
@@ -50,7 +50,6 @@
                 var index = inEvent.index;
                 var item = inEvent.item;
                 var todo = this.todos[index];
-                item.$.checked.setAttribute("type","checkbox");
                 item.$.checked.setAttribute("checked",todo.checked);
                 item.$.name.setContent(todo.name);
             },
