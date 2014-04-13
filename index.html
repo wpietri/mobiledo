@@ -21,10 +21,6 @@
     );
     </script>
     <script>
-        enyo.ready(function () {
-            new MobileDo.Application({name: "app"});
-        });
-
         enyo.kind({
             name: "MobileDo.MainView",
             kind: "FittableRows",
@@ -35,13 +31,30 @@
                 components: [{content: "MobileDo"}]
 
             }, {
-                kind: "enyo.Scroller",
-                fit: true,
-                components: [{content: "Hello, World!"}]
+                name: "repeater",
+                kind: "Repeater", onSetupItem: "setupItem",
+                components: [{
+                    name: "item",
+                    components: [
+                        {tag: "input", name: "checked"},
+                        {tag: "span", content: " "},
+                        {tag: "span", name: "name"}
+                    ]
+                }]
             }, {
                 kind: "onyx.Toolbar",
                 components: []
-            }]
+            }],
+            create: function() { this.inherited(arguments); this.$.repeater.setCount(this.todos.length); },
+            setupItem: function(inSender, inEvent) {
+                var index = inEvent.index;
+                var item = inEvent.item;
+                var todo = this.todos[index];
+                item.$.checked.setAttribute("type","checkbox");
+                item.$.checked.setAttribute("checked",todo.checked);
+                item.$.name.setContent(todo.name);
+            },
+            todos: [{checked:true, name: "work hard"}, {checked:false, name: "drink beer"}]
         });
 
 
@@ -53,6 +66,10 @@
             handlers: {
             }
         });
+        enyo.ready(function () {
+            new MobileDo.Application({name: "app"});
+        });
+
 
 
     </script>
@@ -60,5 +77,6 @@
 </head>
 <body>
 <p>broken!</p>
+
 </body>
 </html>
