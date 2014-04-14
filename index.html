@@ -22,6 +22,33 @@
     </script>
     <script>
         enyo.kind({
+            name: "ToDoList",
+            kind: "Repeater",
+            components: [{
+                name: "item",
+                components: [
+                    {tag: "input", attributes: {type: "checkbox"}, name: "checked"},
+                    {tag: "span", content: " "},
+                    {tag: "span", name: "name"}
+                ]
+            }],
+            setToDos: function(todos) {
+                this.todos = todos;
+                this.setCount(todos.length);
+            },
+            setupItem: function(inSender, inEvent) {
+                var index = inEvent.index;
+                var item = inEvent.item;
+                var todo = this.todos[index];
+                item.$.checked.setAttribute("checked",todo.checked);
+                item.$.name.setContent(todo.name);
+                return true;
+            },
+            handlers: {
+                onSetupItem: "setupItem"
+            }
+        });
+        enyo.kind({
             name: "MobileDo.MainView",
             kind: "FittableRows",
             fit: true,
@@ -31,29 +58,15 @@
                 components: [{content: "MobileDo"}]
 
             }, {
-                name: "repeater",
-                kind: "Repeater", onSetupItem: "setupItem",
-                components: [{
-                    name: "item",
-                    components: [
-                        {tag: "input", attributes: {type: "checkbox"}, name: "checked"},
-                        {tag: "span", content: " "},
-                        {tag: "span", name: "name"}
-                    ]
-                }]
+                name: "todo_list",
+                kind: "ToDoList"
             }, {
                 kind: "onyx.Toolbar",
                 components: []
             }],
-            create: function() { this.inherited(arguments); this.$.repeater.setCount(this.todos.length); },
-            setupItem: function(inSender, inEvent) {
-                var index = inEvent.index;
-                var item = inEvent.item;
-                var todo = this.todos[index];
-                item.$.checked.setAttribute("checked",todo.checked);
-                item.$.name.setContent(todo.name);
-            },
-            todos: [{checked:true, name: "work hard"}, {checked:false, name: "drink beer"}]
+            create: function() { this.inherited(arguments); this.$.todo_list.setToDos(this.initialToDos); },
+
+            initialToDos: [{checked:true, name: "Install MobileDo"}, {checked:false, name: "add some to-dos"}]
         });
 
 
