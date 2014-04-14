@@ -20,6 +20,13 @@
 //            "start.js"
     );
     </script>
+    <style>
+        .todo_name {
+            border:0;
+            width:95%;
+        }
+
+    </style>
     <script>
         enyo.kind({
             name: "ToDoList",
@@ -29,7 +36,7 @@
                 components: [
                     {tag: "input", attributes: {type: "checkbox"}, name: "checked"},
                     {tag: "span", content: " "},
-                    {tag: "span", name: "name"}
+                    {kind: "enyo.Input", name: "name", classes: "todo_name"}
                 ]
             }],
             setToDos: function(todos) {
@@ -41,8 +48,12 @@
                 var item = inEvent.item;
                 var todo = this.todos[index];
                 item.$.checked.setAttribute("checked",todo.checked);
-                item.$.name.setContent(todo.name);
+                item.$.name.setValue(todo.name);
                 return true;
+            },
+            addNew: function() {
+                this.todos.push({checked: false, name:""});
+                this.setCount(this.todos.length);
             },
             handlers: {
                 onSetupItem: "setupItem"
@@ -51,20 +62,24 @@
         enyo.kind({
             name: "MobileDo.MainView",
             kind: "FittableRows",
-            fit: true,
             components: [{
                 name: "toolbar",
                 kind: "onyx.Toolbar",
-                components: [{content: "MobileDo"}]
-
+                layoutKind: "FittableColumnsLayout",
+                components: [
+                    {content: "MobileDo", fit:true},
+                    {kind: "onyx.Button", classes: "onyx-affirmative", content: "+", ontap: "newToDo"}
+                ]
             }, {
                 name: "todo_list",
-                kind: "ToDoList"
+                kind: "ToDoList",
+                fit: true
             }, {
                 kind: "onyx.Toolbar",
                 components: []
             }],
             create: function() { this.inherited(arguments); this.$.todo_list.setToDos(this.initialToDos); },
+            newToDo: function() { this.$.todo_list.addNew(); },
 
             initialToDos: [{checked:true, name: "Install MobileDo"}, {checked:false, name: "add some to-dos"}]
         });
