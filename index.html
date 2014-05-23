@@ -21,6 +21,7 @@
     );
     </script>
     <style>
+        /*noinspection CssUnusedSymbol*/
         .todo_name {
             border:0;
             width:84%;
@@ -30,38 +31,46 @@
     <script>
         enyo.kind({
             name: "ToDoList",
-            kind: "Repeater",
-            components: [{
-                name: "item",
-                components: [
-                    {tag: "input", attributes: {type: "checkbox"}, name: "checked"},
-                    {tag: "span", content: " "},
-                    {kind: "enyo.Input", name: "name", classes: "todo_name"}
-                ]
-            }],
-            setToDos: function(todos) {
+            kind: "Control",
+            components: [
+                {name: "list", kind: "Repeater", onSetupItem: "setupItem", components: [
+                    {name: "item",
+                        components: [
+                            {kind: "enyo.Checkbox", name: "complete", onchange: "completeChanged"},
+                            {tag: "span", content: " "},
+                            {kind: "enyo.Input", name: "name", classes: "todo_name", oninput: "nameChanged"}
+                        ]
+                    }
+                ]}
+            ],
+            completeChanged: function (thing, event) {
+                this.todos[event.index].complete = event.originator.checked;
+            },
+            nameChanged: function () {
+                this.todos[event.index].name = event.originator.getValue();
+            },
+            setToDos: function (todos) {
                 this.todos = todos;
-                this.setCount(todos.length);
+                this.$.list.setCount(todos.length);
             },
             setupItem: function(inSender, inEvent) {
                 var index = inEvent.index;
                 var item = inEvent.item;
                 var todo = this.todos[index];
-                item.$.checked.setAttribute("checked",todo.checked);
+                item.$.complete.checked = todo.complete;
                 item.$.name.setValue(todo.name);
                 return true;
             },
             addNew: function() {
-                this.todos.push({checked: false, name:""});
-                this.setCount(this.todos.length);
-            },
-            handlers: {
-                onSetupItem: "setupItem"
+                this.todos.push({complete: false, name:""});
+                this.$.list.setCount(this.todos.length);
+                this.$.list.controlAtIndex(this.$.list.count-1).$.name.focus();
             }
         });
         enyo.kind({
             name: "MobileDo.MainView",
             kind: "FittableRows",
+
             components: [{
                 name: "toolbar",
                 kind: "onyx.Toolbar",
@@ -81,7 +90,7 @@
             create: function() { this.inherited(arguments); this.$.todo_list.setToDos(this.initialToDos); },
             newToDo: function() { this.$.todo_list.addNew(); },
 
-            initialToDos: [{checked:true, name: "Install MobileDo"}, {checked:false, name: "add some to-dos"}]
+            initialToDos: [{complete:true, name: "Install MobileDo"}, {complete:false, name: "add some to-dos"}]
         });
 
 
