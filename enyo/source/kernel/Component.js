@@ -1,3 +1,28 @@
+var debugEvents = true;
+var debugBubbling = false;
+
+function describeElement(t) {
+    if (t==null) return "null element";
+    return t.nodeName + " " + t.id + " (" + t.className + ")"
+
+}
+function describeEventTarget(event) {
+    if (event==null) return "null event";
+    return describeElement(event.target);
+}
+
+
+var boringEvents = ['move', 'enter', 'leave'];
+
+function runForFilteredEvents(target, event, f) {
+    var eventType = event.type;
+    if (eventType && (!(eventType.indexOf('mouse')>=0 || boringEvents.indexOf(eventType)>=0))) {
+        f(target, event, eventType);
+    }
+}
+
+
+
 /**
 	_enyo.Component_ is the fundamental building block for Enyo applications.
 	Components are designed to fit together, allowing complex behaviors to be
@@ -376,7 +401,13 @@ enyo.kind({
 			ontap: "tapHandler"
 	*/
 	dispatchEvent: function(name, event, sender) {
-		if (this._silenced) {
+        if (debugEvents) {
+            runForFilteredEvents(this, event, function (target, event, eventType) {
+                console.log("Component.dispatchEvent: ", eventType + "/" + name + "->" + (target));
+            });
+        }
+
+        if (this._silenced) {
 			return;
 		}
 		// if the event has a delegate associated with it we grab that
@@ -392,11 +423,32 @@ enyo.kind({
 
 		// first, handle any delegated events intended for this object
 		if (delegate && delegate.owner === this) {
-			// the most likely case is that we have a method to handle this
+            if (debugEvents && debugBubbling) {
+                runForFilteredEvents(this, event, function (target, event, eventType) {
+                    console.log("delegate exists", delegate);
+                });
+            }
+
+
+            // the most likely case is that we have a method to handle this
 			if (this[name] && "function" === typeof this[name]) {
-				return this.dispatch(name, event, sender);
+                if (debugEvents && debugBubbling) {
+                    runForFilteredEvents(this, event, function (target, event, eventType) {
+                        console.log("sending to own method", name);
+                    });
+                }
+
+                return this.dispatch(name, event, sender);
 			}
-			// but if we don't, just stop the event from going further
+            if (debugEvents && debugBubbling) {
+                var oldThis = this;
+                runForFilteredEvents(this, event, function (target, event, eventType) {
+                    console.log("failed to find function", name, "on", oldThis);
+                });
+            }
+
+
+            // but if we don't, just stop the event from going further
 			return;
 		}
 
@@ -404,20 +456,40 @@ enyo.kind({
 		if (!delegate) {
 			if (this.handlers && this.handlers[name] &&
 				this.dispatch(this.handlers[name], event, sender)) {
-				return true;
+                if (debugEvents && debugBubbling) {
+                    runForFilteredEvents(this, event, function (target, event, eventType) {
+                        console.log("handler succeeded for ", name);
+                    });
+                }
+
+                return true;
 			}
 			// then check for a delegate property for this event
 			if (this[name] && enyo.isString(this[name])) {
 				// we dispatch it up as a special delegate event with the
 				// component that had the delegation string property stored in
 				// the "delegate" property
-				event.delegate = this;
+
+                if (debugEvents && debugBubbling) {
+                    var chosenDelegate = this[name];
+                    runForFilteredEvents(this, event, function (target, event, eventType) {
+                        console.log("delegating by method name " + name + " to " + chosenDelegate);
+                    });
+                }
+
+                event.delegate = this;
 				ret = this.bubbleUp(this[name], event, sender);
 				delete event.delegate;
 				return ret;
 			}
 		}
-	},
+        if (debugEvents && debugBubbling) {
+            runForFilteredEvents(this, event, function (target, event, eventType) {
+                console.log("Component.dispatchEvent: giving up");
+            });
+        }
+
+    },
 	// internal - try dispatching event to self, if that fails bubble it up the tree
 	dispatchBubble: function(inEventName, inEvent, inSender) {
 		if (this._silenced) {
