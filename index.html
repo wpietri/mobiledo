@@ -29,21 +29,42 @@
 
     </style>
     <script>
+        Array.prototype.remove = function(from, to) {
+            var rest = this.slice((to || from) + 1 || this.length);
+            this.length = from < 0 ? this.length + from : from;
+            return this.push.apply(this, rest);
+        };
+
         enyo.kind({
             name: "ToDoList",
             kind: "Control",
+            popup: function (inSender, inEvent) {
+                this.$.popup.selectedItemIndex = inEvent.index;
+                this.$.popup.requestShowMenu();
+            },
             components: [
-                {name: "list", kind: "Repeater", onSetupItem: "setupItem", components: [
-                    {name: "item",
-                        components: [
-                            {kind: "enyo.Checkbox", name: "complete", onchange: "completeChanged"},
-                            {tag: "span", content: " "},
-                            {kind: "enyo.Input", name: "name", classes: "todo_name", oninput: "nameChanged"}
-                        ]
-                    }
+                {name: "list", kind: "Repeater", onSetupItem: "setupItem",
+                    components: [
+                        {name: "item",
+                            components: [
+                                {kind: "enyo.Checkbox", name: "complete", onchange: "completeChanged"},
+                                {tag: "span", content: " "},
+                                {kind: "enyo.Input", name: "name", classes: "todo_name", oninput: "nameChanged", onhold: "popup"}
+                            ]
+                        }
+                    ]},
+                {kind: "onyx.MenuDecorator", name: "popup", components: [
+                    {kind: "onyx.Menu", components: [
+                        {content: "delete item", onSelect: "deleteSelected"}
+                    ]}
                 ]}
             ],
-            completeChanged: function (thing, event) {
+            deleteSelected: function (inSender, inEvent) {
+                this.todos.remove(this.$.popup.selectedItemIndex);
+                delete this.$.popup.selectedItemIndex;
+                this.$.list.setCount(this.todos.length);
+            },
+            completeChanged: function (inSender, inEvent) {
                 this.todos[event.index].complete = event.originator.checked;
             },
             nameChanged: function () {
@@ -53,7 +74,7 @@
                 this.todos = todos;
                 this.$.list.setCount(todos.length);
             },
-            setupItem: function(inSender, inEvent) {
+            setupItem: function (inSender, inEvent) {
                 var index = inEvent.index;
                 var item = inEvent.item;
                 var todo = this.todos[index];
@@ -61,10 +82,10 @@
                 item.$.name.setValue(todo.name);
                 return true;
             },
-            addNew: function() {
-                this.todos.push({complete: false, name:""});
+            addNew: function () {
+                this.todos.push({complete: false, name: ""});
                 this.$.list.setCount(this.todos.length);
-                this.$.list.controlAtIndex(this.$.list.count-1).$.name.focus();
+                this.$.list.controlAtIndex(this.$.list.count - 1).$.name.focus();
             }
         });
         enyo.kind({
