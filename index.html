@@ -29,7 +29,7 @@
 
     </style>
     <script>
-        Array.prototype.remove = function(from, to) {
+        Array.prototype.remove = function (from, to) {
             var rest = this.slice((to || from) + 1 || this.length);
             this.length = from < 0 ? this.length + from : from;
             return this.push.apply(this, rest);
@@ -92,26 +92,38 @@
             name: "MobileDo.MainView",
             kind: "FittableRows",
 
-            components: [{
-                name: "toolbar",
-                kind: "onyx.Toolbar",
-                layoutKind: "FittableColumnsLayout",
-                components: [
-                    {content: "MobileDo", fit:true},
-                    {kind: "onyx.Button", classes: "onyx-affirmative", content: "+", ontap: "newToDo"}
-                ]
-            }, {
-                name: "todo_list",
-                kind: "ToDoList",
-                fit: true
-            }, {
-                kind: "onyx.Toolbar",
-                components: []
-            }],
-            create: function() { this.inherited(arguments); this.$.todo_list.setToDos(this.initialToDos); },
-            newToDo: function() { this.$.todo_list.addNew(); },
+            components: [
+                {
+                    name: "toolbar",
+                    kind: "onyx.Toolbar",
+                    layoutKind: "FittableColumnsLayout",
+                    components: [
+                        {content: "MobileDo", fit: true},
+                        {kind: "onyx.Button", classes: "onyx-affirmative", content: "+", ontap: "newToDo"}
+                    ]
+                },
+                {
+                    name: "todo_list",
+                    kind: "ToDoList",
+                    fit: true
+                },
+                {
+                    kind: "onyx.Toolbar",
+                    components: []
+                }
+            ],
+            create: function () {
+                this.inherited(arguments);
+                this.$.todo_list.setToDos(this.initialToDos);
+            },
+            newToDo: function () {
+                this.$.todo_list.addNew();
+            },
 
-            initialToDos: [{complete:true, name: "Install MobileDo"}, {complete:false, name: "add some to-dos"}]
+            initialToDos: [
+                {complete: true, name: "Install MobileDo"},
+                {complete: false, name: "add some to-dos"}
+            ]
         });
 
 
@@ -126,7 +138,6 @@
         enyo.ready(function () {
             new MobileDo.Application({name: "app"});
         });
-
 
 
     </script>
