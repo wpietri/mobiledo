@@ -40,7 +40,7 @@
             kind: "Control",
             popup: function (inSender, inEvent) {
                 this.$.popup.selectedItemIndex = inEvent.index;
-                this.$.popup.requestShowMenu();
+                this.$.popup.showAtEvent(inEvent);
             },
             components: [
                 {name: "list", kind: "Repeater", onSetupItem: "setupItem",
@@ -53,16 +53,22 @@
                             ]
                         }
                     ]},
-                {kind: "onyx.MenuDecorator", name: "popup", components: [
-                    {kind: "onyx.Menu", components: [
-                        {content: "delete item", onSelect: "deleteSelected"}
+                {kind: "onyx.Popup", name: "popup", components: [
+                    {components: [
+                        {content: "delete item", ontap: "deleteSelected"},
+                        {content: "duplicate item", ontap: "duplicateSelected"}
                     ]}
                 ]}
             ],
             deleteSelected: function (inSender, inEvent) {
                 this.todos.remove(this.$.popup.selectedItemIndex);
                 delete this.$.popup.selectedItemIndex;
-                this.$.list.setCount(this.todos.length);
+                this.refresh();
+            },
+            duplicateSelected: function (inSender, inEvent) {
+                var position = this.$.popup.selectedItemIndex;
+                this.todos.splice(position+1, 0, this.todos[position]);
+                this.refresh();
             },
             completeChanged: function (inSender, inEvent) {
                 this.todos[event.index].complete = event.originator.checked;
@@ -72,7 +78,7 @@
             },
             setToDos: function (todos) {
                 this.todos = todos;
-                this.$.list.setCount(todos.length);
+                this.refresh();
             },
             setupItem: function (inSender, inEvent) {
                 var index = inEvent.index;
@@ -84,8 +90,12 @@
             },
             addNew: function () {
                 this.todos.push({complete: false, name: ""});
-                this.$.list.setCount(this.todos.length);
+                this.refresh();
                 this.$.list.controlAtIndex(this.$.list.count - 1).$.name.focus();
+            },
+            refresh: function() {
+                this.$.popup.hide();
+                this.$.list.setCount(this.todos.length);
             }
         });
         enyo.kind({
