@@ -1,10 +1,21 @@
 var debugEvents = true;
-var debugBubbling = false;
+var debugBubbling = true;
+
+// show only these
+var interestingEvents = ['down'];
+
+// otherwise, show all but these
+var boringEvents = ['mousemove', 'mouseover', 'mouseout', 'move', 'enter', 'leave'];
+
+// and anything matching this
+const ignoreEventsContaining = 'thingihate';
+
+
 
 function describeElement(t) {
     if (t==null) return "null element";
-    return t.nodeName + " " + t.id + " (" + t.className + ")"
 
+    return t.nodeName + " " + t.id + " (" + t.className + ")"
 }
 function describeEventTarget(event) {
     if (event==null) return "null event";
@@ -12,12 +23,17 @@ function describeEventTarget(event) {
 }
 
 
-var boringEvents = ['move', 'enter', 'leave'];
+function boring(eventType) {
+    return (eventType.indexOf(ignoreEventsContaining) >= 0 || boringEvents.indexOf(eventType) >= 0);
+}
 
 function runForFilteredEvents(target, event, f) {
     var eventType = event.type;
-    if (eventType && (!(eventType.indexOf('mouse')>=0 || boringEvents.indexOf(eventType)>=0))) {
-        f(target, event, eventType);
+    if (!eventType) return;
+    if (interestingEvents.length>0) {
+        if (interestingEvents.indexOf(eventType)>=0) f(target, event, eventType);
+    } else {
+        if (eventType && !boring(eventType)) f(target, event, eventType);
     }
 }
 
@@ -404,6 +420,8 @@ enyo.kind({
         if (debugEvents) {
             runForFilteredEvents(this, event, function (target, event, eventType) {
                 console.log("Component.dispatchEvent: ", eventType + "/" + name + "->" + (target));
+                console.log(this);
+                debugger;
             });
         }
 
