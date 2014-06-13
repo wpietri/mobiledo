@@ -19,7 +19,7 @@
 <ion-side-menus>
 
     <!-- Center content -->
-    <ion-side-menu-content>
+    <ion-side-menu-content drag-content="false">
         <ion-header-bar class="bar-dark">
             <button class="button button-icon" ng-click="toggleProjects()">
                 <i class="icon ion-navicon"></i>
@@ -33,7 +33,7 @@
         </ion-header-bar>
         <ion-content>
             <!-- our list and list items -->
-            <ion-list>
+            <ion-list can-swipe="true" show-delete="true">
                 <ion-item ng-repeat="task in activeProject.tasks">
                     {{task.title}}
                 </ion-item>
