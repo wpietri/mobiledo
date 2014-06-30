@@ -1,12 +1,7 @@
-// Ionic Starter App
 
-// angular.module is a global place for creating, registering and retrieving Angular modules
-// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
-// the 2nd parameter is an array of 'requires'
+angular.module('todo', ['ionic', 'LocalStorageModule'])
 
-angular.module('todo', ['ionic'])
-
-    .factory('Projects', function() {
+    .factory('Projects', function(localStorageService) {
         return {
             newProject: function(projectTitle) {
                 // Add a new project
@@ -16,14 +11,12 @@ angular.module('todo', ['ionic'])
                 };
             },
             all: function() {
-                var projectString = window.localStorage['projects'];
-                if(projectString) {
-                    return angular.fromJson(projectString);
-                }
+                var projects = localStorageService.get('projects');
+                if (projects) return projects;
                 return [this.newProject("work"),this.newProject("home")];
             },
             save: function(projects) {
-                window.localStorage['projects'] = angular.toJson(projects);
+                localStorageService.set('projects',projects);
             }
         }
     })
@@ -31,6 +24,7 @@ angular.module('todo', ['ionic'])
 
     .controller('TodoCtrl', function($scope, $ionicModal, Projects, $ionicSideMenuDelegate) {
         $scope.projects = Projects.all();
+        $scope.$watch('projects', function() {Projects.save($scope.projects); console.log('saved')}, true);
         $scope.activeProject = $scope.projects[0];
         $ionicModal.fromTemplateUrl('new-task.html', function(modal) {
             $scope.taskModal = modal;
@@ -73,7 +67,6 @@ angular.module('todo', ['ionic'])
         var createProject = function(projectTitle) {
             var newProject = Projects.newProject(projectTitle);
             $scope.projects.push(newProject);
-            Projects.save($scope.projects);
             $scope.selectProject(newProject, $scope.projects.length-1);
         };
 

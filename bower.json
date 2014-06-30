@@ -1,10 +1,10 @@
 {
-  "name": "HelloIonic",
+  "name": "MobileDo",
   "private": "true",
   "devDependencies": {
     "ionic": "driftyco/ionic-bower#1.0.0-beta.8"
   },
   "dependencies": {
-    "observe-js": "0.3.3"
+    "angular-local-storage": "0.0.5"
   }
 }
